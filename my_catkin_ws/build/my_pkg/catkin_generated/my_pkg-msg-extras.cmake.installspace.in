@@ -1,0 +1,2 @@
+set(my_pkg_MESSAGE_FILES "msg/FibonacciAction.msg;msg/FibonacciActionGoal.msg;msg/FibonacciActionResult.msg;msg/FibonacciActionFeedback.msg;msg/FibonacciGoal.msg;msg/FibonacciResult.msg;msg/FibonacciFeedback.msg;msg/reach_positionAction.msg;msg/reach_positionActionGoal.msg;msg/reach_positionActionResult.msg;msg/reach_positionActionFeedback.msg;msg/reach_positionGoal.msg;msg/reach_positionResult.msg;msg/reach_positionFeedback.msg")
+set(my_pkg_SERVICE_FILES "srv/myService.srv")

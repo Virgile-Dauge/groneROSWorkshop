@@ -1,0 +1,9 @@
+#goal definition
+int32 x
+int32 y
+---
+#result definition
+int32 time
+---
+#feedback
+int32 distance
