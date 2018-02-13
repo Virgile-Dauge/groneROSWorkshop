@@ -1,14 +1,14 @@
 <launch>
   <node
-    pkg="turtlesim"
-    type="turtlesim_node"
-    name="turtlesim_node"
+    pkg="my_pkg"
+    type="turtle_action_server.py"
+    name="turtle_action_server_node"
     output="screen"
   />
   <node
     pkg="my_pkg"
-    type="turtle_action_server.py"
-    name="turtle_action_server_node"
+    type="pioneer_driver.py"
+    name="pioneer_driver"
     output="screen"
   />
 </launch>

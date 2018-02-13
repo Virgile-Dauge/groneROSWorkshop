@@ -56,15 +56,15 @@ find_package(Boost REQUIRED COMPONENTS system thread)
 # )
 
 ## Generate services in the 'srv' folder
-add_service_files(
-  FILES
-  myService.srv
-)
+# add_service_files(
+#   FILES
+#   myService.srv
+# )
 
 ## Generate actions in the 'action' folder
 add_action_files(
   FILES
-  Fibonacci.action
+  # Fibonacci.action
   reach_position.action
 )
 

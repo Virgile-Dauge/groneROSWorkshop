@@ -3,6 +3,7 @@ import rospy
 
 import actionlib
 from geometry_msgs.msg  import Twist
+from nav_msgs.msg  import Odometry
 from turtlesim.msg import Pose
 from math import pow,atan2,sqrt
 import my_pkg.msg
@@ -16,26 +17,27 @@ class reach_positionAction(object):
         self._action_name = 'turtle_action'
         self._as = actionlib.SimpleActionServer(self._action_name, my_pkg.msg.reach_positionAction, execute_cb=self.execute_cb, auto_start = False)
         self._as.start()
-        self.velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
-        self.pose_subscriber = rospy.Subscriber('/turtle1/pose', Pose, self.callback)
-        self.pose = Pose()
+        self.velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
+        self.pose_subscriber = rospy.Subscriber('/pioneer_p3dx/odom', Odometry, self.callback)
+        self.pose = Odometry().pose.pose
         self.rate = rospy.Rate(10)
 
     #Callback function implementing the pose value received
     def callback(self, data):
-        self.pose = data
-        self.pose.x = round(self.pose.x, 4)
-        self.pose.y = round(self.pose.y, 4)
+        self.pose = data.pose.pose
+        self.pose.position.x = round(self.pose.position.x, 4)
+        self.pose.position.y = round(self.pose.position.y, 4)
 
     def get_distance(self, goal_x, goal_y):
-        distance = sqrt(pow((goal_x - self.pose.x), 2) + pow((goal_y - self.pose.y), 2))
+        distance = sqrt(pow((goal_x - self.pose.position.x), 2) + pow((goal_y - self.pose.position.y), 2))
         return distance
 
     def execute_cb(self, goal):
         # helper variables
         r = rospy.Rate(1)
         success = True
-        max_speed = 5
+        max_speed = 1
+        p = 1
 
         goal_pose = Pose()
         goal_pose.x = goal.x
@@ -58,14 +60,17 @@ class reach_positionAction(object):
 
             #Porportional Controller
             #linear velocity in the x-axis:
-            vel_msg.linear.x = 1.5 * self.get_distance(goal_pose.x, goal_pose.y)
+            computed_vel = p * self.get_distance(goal_pose.x, goal_pose.y)
+            if computed_vel > max_speed :
+                computed_vel = max_speed
+            vel_msg.linear.x = computed_vel
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
 
             #angular velocity in the z-axis:
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = 4 * (atan2(goal_pose.y - self.pose.y, goal_pose.x - self.pose.x) - self.pose.theta)
+            vel_msg.angular.z = 4 * (atan2(goal_pose.y - self.pose.position.y, goal_pose.x - self.pose.position.x) - self.pose.orientation.z)
 
             self._feedback.distance = self.get_distance(goal_pose.x,goal_pose.y)
             # publish the feedback
