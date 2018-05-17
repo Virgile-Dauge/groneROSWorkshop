@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 import rospy
-
+from simple_pid import PID
 import actionlib
 from geometry_msgs.msg  import Twist
 from nav_msgs.msg  import Odometry
@@ -36,17 +36,17 @@ class reach_positionAction(object):
         # helper variables
         r = rospy.Rate(1)
         success = True
-        max_speed = 1
+        max_linear_speed = 1
+        max_angular_speed = 0.1
         p = 1
 
         goal_pose = Pose()
         goal_pose.x = goal.x
         goal_pose.y = goal.y
-        distance_tolerance = 0.5
+        distance_tolerance = 1
         vel_msg = Twist()
 
         self._feedback.distance = 0
-
         # publish info to the console for the user
         rospy.loginfo("starting procedure to reach new goal")
         # start executing the action
@@ -60,17 +60,20 @@ class reach_positionAction(object):
 
             #Porportional Controller
             #linear velocity in the x-axis:
-            computed_vel = p * self.get_distance(goal_pose.x, goal_pose.y)
-            if computed_vel > max_speed :
-                computed_vel = max_speed
-            vel_msg.linear.x = computed_vel
+            computed_linear_vel = p * self.get_distance(goal_pose.x, goal_pose.y)
+            if computed_linear_vel > max_linear_speed :
+                computed_linear_vel = max_linear_speed
+            vel_msg.linear.x = computed_linear_vel
             vel_msg.linear.y = 0
             vel_msg.linear.z = 0
 
             #angular velocity in the z-axis:
+            computed_angular_vel = 4 * (atan2(goal_pose.y - self.pose.position.y, goal_pose.x - self.pose.position.x) - self.pose.orientation.z)
             vel_msg.angular.x = 0
             vel_msg.angular.y = 0
-            vel_msg.angular.z = 4 * (atan2(goal_pose.y - self.pose.position.y, goal_pose.x - self.pose.position.x) - self.pose.orientation.z)
+            if computed_angular_vel > max_angular_speed :
+                computed_angular_vel = max_angular_speed
+            vel_msg.angular.z = computed_angular_vel
 
             self._feedback.distance = self.get_distance(goal_pose.x,goal_pose.y)
             # publish the feedback
